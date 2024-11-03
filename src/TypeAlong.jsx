@@ -45,7 +45,29 @@ export function TypeAlong(props) {
     const [promptIndex, setPromptIndex] = useState(0);
     const {setCurrentChar} = props
 
-    const prompts = ["asdf!1", "YOOO*&^"];
+    const prompts = [
+        "The quick brown fox jumps over the lazy dog.",
+        "Hello World! Welcome to JavaScript programming.",
+        "Coding is a journey, not a destination.",
+        "Frontend development requires creativity and logic.",
+        "React and Redux make state management easier.",
+        "Challenge yourself every day to improve your skills.",
+        "HTML, CSS, and JavaScript are web basics.",
+        "Debugging is an essential skill for developers.",
+        "Typing accurately is crucial for productivity.",
+        "Stay focused and keep learning new concepts.",
+        "Clean code is easy to read and maintain.",
+        "The best way to learn coding is by doing it.",
+        "Problem-solving skills are key in programming.",
+        "Consistent practice leads to mastery over time.",
+        "Shortcuts can improve your workflow efficiency.",
+        "Always test your code before deploying it.",
+        "Version control helps in tracking code changes.",
+        "Responsive design is essential for mobile users.",
+        "Code reviews improve quality and collaboration.",
+        "Learning algorithms strengthens coding skills."
+    ];
+    
     const promptObjects = prompts.map((prompt) => new Phrase(prompt)); // array of prompt object for each prompt string
 
     const handleKeyDown = (e) => {

@@ -48,30 +48,33 @@ export function Keyboard(props) {
     const currentCharObj = new Key(currentChar);
     const isCurrentCharCapital = currentCharObj.isCapitalChar();
 
-    const firstRow = [
-        '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='
-    ]
-    const secondRow = [
-        'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'
-    ]
-    const thirdRow = [
-        'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', `'`
-    ]
-    const fourthRow = [
-        'Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 'Shift'
-    ];
-    
-    let firstRowKeys = firstRow.map(key => new Key(key));
-    let secondRowKeys = secondRow.map(key => new Key(key));
-    let thirdRowKeys = thirdRow.map(key => new Key(key));
-    let fourthRowKeys = fourthRow.map(key => new Key(key));
+    const firstRowKeys = Key.lowerCaseKeys.slice(0, 13).map(key => new Key(key));
+    const secondRowKeys = Key.lowerCaseKeys.slice(13, 26).map(key => new Key(key));
+    const thirdRowKeys = Key.lowerCaseKeys.slice(26, 37).map(key => new Key(key));
+    const fourthRowKeys = Key.lowerCaseKeys.slice(37, 50).map(key => new Key(key));
 
     const handleKeyDown = (e) => {
         const currentKey = e.key;
 
         if (currentKey === "Shift") {
             setIsCapitalized(true);
-        } 
+            // Reset keys that were highlighted only due to capitalization
+            setKeyStates((oldKeysState) => {
+                const newKeyStates = { ...oldKeysState };
+                // for each key, get their lower case version, if the capitalized version is pressed in the old key states then reset it and reset the regular key
+                Key.lowerCaseKeys.forEach(lowerKey => {
+                    // get lower cased version
+                    const upperCaseKey = Key.capitalizedKeys[Key.lowerCaseKeys.indexOf(lowerKey)];
+
+                    // reset key's state
+                    if (newKeyStates[lowerKey]) {
+                        newKeyStates[upperCaseKey] = false;
+                        newKeyStates[lowerKey] = false;
+                    }
+                });
+                return newKeyStates;
+            });
+        }
         setKeyStates((oldKeysState) => ({
             ...oldKeysState,
             [currentKey]: true
@@ -81,14 +84,31 @@ export function Keyboard(props) {
 
     const handleKeyUp = (e) => {
         const currentKey = e.key;
-
+    
         if (currentKey === "Shift") {
             setIsCapitalized(false);
-        }
+            // Reset keys that were highlighted only due to capitalization
+            setKeyStates((oldKeysState) => {
+                const newKeyStates = { ...oldKeysState };
+                // for each key, get their lower case version, if the capitalized version is pressed in the old key states then reset it and reset the regular key
+                Key.capitalizedKeys.forEach(capitalKey => {
+                    // get lower cased version
+                    const lowerCaseKey = Key.lowerCaseKeys[Key.capitalizedKeys.indexOf(capitalKey)];
+
+                    // reset key's state
+                    if (newKeyStates[capitalKey]) {
+                        newKeyStates[capitalKey] = false;
+                        newKeyStates[lowerCaseKey] = false;
+                    }
+                });
+                return newKeyStates;
+            });
+        } 
         setKeyStates((oldKeysState) => ({
             ...oldKeysState,
             [currentKey]: false
         }));
+        
     };
 
     useEffect(() => {
@@ -127,7 +147,8 @@ export function Keyboard(props) {
             <div className="keyboard-row">
                 {secondRowKeys.map((key, index) => {
                     let className = "";
-                    if (keyStates[key.key]) {
+
+                    if (keyStates[key.displayUpperCase()] || keyStates[key.key]) {
                         className += "active ";
                     }
                     if (isCapitalized && currentChar === key.displayUpperCase() || !key.isCapitalChar() && !isCapitalized && currentChar === key.key) {
@@ -146,7 +167,7 @@ export function Keyboard(props) {
             <div className="keyboard-row">
                 {thirdRowKeys.map((key, index) => {
                     let className = "";
-                    if (keyStates[key.key]) {
+                    if (keyStates[key.displayUpperCase()] || keyStates[key.key]) {
                         className += "active ";
                     }
                     if (isCapitalized && currentChar === key.displayUpperCase() || !key.isCapitalChar() && !isCapitalized && currentChar === key.key) {
@@ -165,7 +186,7 @@ export function Keyboard(props) {
             <div className="keyboard-row">
                 {fourthRowKeys.map((key, index) => {
                     let className = "";
-                    if (keyStates[key.key]) {
+                    if (keyStates[key.displayUpperCase()] || keyStates[key.key]) {
                         className += "active ";
                     }
                     if (key.key === "Shift") {
@@ -174,10 +195,7 @@ export function Keyboard(props) {
                             className += "highlighted ";
                         }
                     }
-                    if (keyStates[key.key]) {
-                        className += "active ";
-                    }
-                    if (key.displayUpperCase() === currentChar) {
+                    if (isCapitalized && currentChar === key.displayUpperCase() || !key.isCapitalChar() && !isCapitalized && currentChar === key.key) {
                         className += "highlighted";
                     } 
                     return (
