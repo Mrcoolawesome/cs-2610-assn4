@@ -9,3 +9,4 @@
 7. If the user finishes a prompt, create a new one 
 8. When the user begins a new prompt, start them from the beginning
 9. The keyboard shall allow multiple keys to be pressed at once
+10. The onscreen keybaord shall highlight which key should be pressed

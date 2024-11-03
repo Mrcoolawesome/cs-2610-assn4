@@ -26,45 +26,48 @@ class Key {
         return this.key;
     }
 
-    displayLowerCase() {
-        if (Key.capitalizedKeys.includes(this.key)) { // if upper case
-            const index = Key.capitalizedKeys.indexOf(this.key);
-            const lowerCaseKey = Key.lowerCaseKeys[index];
-            return lowerCaseKey;
+    displayUpperCase() {
+        if (Key.lowerCaseKeys.includes(this.key)) { // if upper case
+            const index = Key.lowerCaseKeys.indexOf(this.key);
+            const capitalKey = Key.capitalizedKeys[index];
+            return capitalKey;
         }
         return this.key;
     }
 
+    isCapitalChar() {
+        return Key.capitalizedKeys.includes(this.key);
+    }
+
 }
 
-export function Keyboard() {
+export function Keyboard(props) {
     const [keyStates, setKeyStates] = useState({});
     const [isCapitalized, setIsCapitalized] = useState(false);
+    const {currentChar} = props;
+    const currentCharObj = new Key(currentChar);
+    const isCurrentCharCapital = currentCharObj.isCapitalChar();
 
     const firstRow = [
-        // Number Row
-        '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=',
+        '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='
     ]
     const secondRow = [
-        // second row
         'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'
     ]
     const thirdRow = [
-        // Home Row
         'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', `'`
     ]
     const fourthRow = [
-        // Bottom Row
         'Shift', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 'Shift'
     ];
-    const firstRowKeys = firstRow.map(key => new Key(key));
-    const secondRowKeys = secondRow.map(key => new Key(key));
-    const thirdRowKeys = thirdRow.map(key => new Key(key));
-    const fourthRowKeys = fourthRow.map(key => new Key(key));
+    
+    let firstRowKeys = firstRow.map(key => new Key(key));
+    let secondRowKeys = secondRow.map(key => new Key(key));
+    let thirdRowKeys = thirdRow.map(key => new Key(key));
+    let fourthRowKeys = fourthRow.map(key => new Key(key));
 
     const handleKeyDown = (e) => {
-        const currentKeyObject = new Key(e.key);
-        const currentKey = currentKeyObject.displayLowerCase(); // keep keys in terms of their lower case versions
+        const currentKey = e.key;
 
         if (currentKey === "Shift") {
             setIsCapitalized(true);
@@ -77,8 +80,7 @@ export function Keyboard() {
     };
 
     const handleKeyUp = (e) => {
-        const currentKeyObject = new Key(e.key);
-        const currentKey = currentKeyObject.displayLowerCase(); // keep keys in terms of their lower case versions
+        const currentKey = e.key;
 
         if (currentKey === "Shift") {
             setIsCapitalized(false);
@@ -104,55 +106,84 @@ export function Keyboard() {
     return (
         <div className="keyboard">
             <div className="keyboard-row">
-                {firstRowKeys.map((key, index) => (
-                    <div 
+                {firstRowKeys.map((key, index) => {
+                    let className = "";
+                    if (keyStates[key.key]) {
+                        className += "active ";
+                    }
+                    if (isCapitalized && currentChar === key.displayUpperCase() || !key.isCapitalChar() && !isCapitalized && currentChar === key.key) {
+                        className += "highlighted";
+                    } 
+                    return (
+                        <div 
                         key={index}
-                        className={`key-${keyStates[key.key] ? 'pressed' : 'not-pressed'}`}
-                    >
-                        {key.displayKey(isCapitalized)}
-                    </div>
-                ))}
+                        className={`key ${className}`}
+                        >
+                            {key.displayKey(isCapitalized)}
+                        </div>
+                    );
+                })}
             </div>
             <div className="keyboard-row">
-                {secondRowKeys.map((key, index) => (
-                    <div 
+                {secondRowKeys.map((key, index) => {
+                    let className = "";
+                    if (keyStates[key.key]) {
+                        className += "active ";
+                    }
+                    if (isCapitalized && currentChar === key.displayUpperCase() || !key.isCapitalChar() && !isCapitalized && currentChar === key.key) {
+                        className += "highlighted";
+                    } 
+                    return (
+                        <div 
                         key={index}
-                        className={`key-${keyStates[key.key] ? 'pressed' : 'not-pressed'}`}
-                    >
-                        {key.displayKey(isCapitalized)}
-                    </div>
-                ))}
+                        className={`key ${className}`}
+                        >
+                            {key.displayKey(isCapitalized)}
+                        </div>
+                    );
+                })}
             </div>
             <div className="keyboard-row">
-                {thirdRowKeys.map((key, index) => (
-                    <div 
+                {thirdRowKeys.map((key, index) => {
+                    let className = "";
+                    if (keyStates[key.key]) {
+                        className += "active ";
+                    }
+                    if (isCapitalized && currentChar === key.displayUpperCase() || !key.isCapitalChar() && !isCapitalized && currentChar === key.key) {
+                        className += "highlighted";
+                    } 
+                    return (
+                        <div 
                         key={index}
-                        className={`key-${keyStates[key.key] ? 'pressed' : 'not-pressed'}`}
-                    >
-                        {key.displayKey(isCapitalized)}
-                    </div>
-                ))}
+                        className={`key ${className}`}
+                        >
+                            {key.displayKey(isCapitalized)}
+                        </div>
+                    );
+                })}
             </div>
             <div className="keyboard-row">
                 {fourthRowKeys.map((key, index) => {
                     let className = "";
                     if (keyStates[key.key]) {
-                        if (key.key === "Shift") {
-                            className = 'shift-pressed';
-                        } else {
-                            className ='pressed';
-                        }
-                    } else {
-                        if (key.key === "Shift") {
-                            className = 'shift-not-pressed';
-                        } else {
-                            className = 'not-pressed';
+                        className += "active ";
+                    }
+                    if (key.key === "Shift") {
+                        className += "shift ";
+                        if (isCurrentCharCapital && !isCapitalized) { // if the currentChar is a captialized character and we haven't already pressed the shift key
+                            className += "highlighted ";
                         }
                     }
+                    if (keyStates[key.key]) {
+                        className += "active ";
+                    }
+                    if (key.displayUpperCase() === currentChar) {
+                        className += "highlighted";
+                    } 
                     return (
                         <div 
                         key={index}
-                        className={`key-${className}`}
+                        className={`key ${className}`}
                         >
                             {key.displayKey(isCapitalized)}
                         </div>
@@ -162,7 +193,7 @@ export function Keyboard() {
             <div className="keyboard-row">
                 <div 
                     key={0}
-                    className={`key-spacebar-${keyStates[" "] ? 'pressed' : 'not-pressed'}`}
+                    className={`key spacebar ${keyStates[" "] ? 'active' : ''}${currentChar === " " ? 'highlighted' : ''}`}
                 > 
                 </div>
             </div>
