@@ -18,55 +18,49 @@ class Key {
         this.key = key;
     }
 
-    displayKey(isCapitalized) {
-        if (isCapitalized) {
+    // all the keys are based off their lower case versions, so we sometimes need to display them as capitalized
+    displayKey(capitalize) {
+        if (capitalize) {
             const index = Key.lowerCaseKeys.indexOf(this.key);
             return Key.capitalizedKeys[index];
+        } else {
+            return this.key;
         }
-        return this.key;
     }
 
-    displayUpperCase() {
-        if (Key.lowerCaseKeys.includes(this.key)) { // if upper case
-            const index = Key.lowerCaseKeys.indexOf(this.key);
-            const capitalKey = Key.capitalizedKeys[index];
-            return capitalKey;
-        }
-        return this.key;
-    }
-
+    // checks if the current key is a capitalized key
     isCapitalChar() {
         return Key.capitalizedKeys.includes(this.key);
     }
 
 }
 
+// this will display the keyboard and provide its functionality
 export function Keyboard(props) {
+    // will contain objects that have one parameter which is their name associated with a boolean that states whether they're pressed or not
     const [keyStates, setKeyStates] = useState({});
-    const [isCapitalized, setIsCapitalized] = useState(false);
-    const {currentChar} = props;
+    // boolean state that determines whether the keyboard is in capitalized mode (shift key down) or not
+    const [isKeyboardCapitalized, setIsKeyboardCapitalized] = useState(false); 
+    const {currentChar} = props; // hoisted state from the TypeAlong component, it is the current char the user need to type
     const currentCharObj = new Key(currentChar);
     const isCurrentCharCapital = currentCharObj.isCapitalChar();
 
-    const firstRowKeys = Key.lowerCaseKeys.slice(0, 13).map(key => new Key(key));
-    const secondRowKeys = Key.lowerCaseKeys.slice(13, 26).map(key => new Key(key));
-    const thirdRowKeys = Key.lowerCaseKeys.slice(26, 37).map(key => new Key(key));
-    const fourthRowKeys = Key.lowerCaseKeys.slice(37, 50).map(key => new Key(key));
-
+    // this will handle state chanages for when a key is pressed
     const handleKeyDown = (e) => {
         const currentKey = e.key;
 
+        // if the current key is the shift key, set the keyboard state to capitalized
         if (currentKey === "Shift") {
-            setIsCapitalized(true);
-            // Reset keys that were highlighted only due to capitalization
+            setIsKeyboardCapitalized(true);
+            // to prevent keys from sticking if they're held down between capitalized states, we need to manually reset them
             setKeyStates((oldKeysState) => {
                 const newKeyStates = { ...oldKeysState };
-                // for each key, get their lower case version, if the capitalized version is pressed in the old key states then reset it and reset the regular key
+                // for each key, get their upper case & upper case version, if the lower case version is pressed in the old key state then reset it and reset the capitalized key
                 Key.lowerCaseKeys.forEach(lowerKey => {
-                    // get lower cased version
+                    // get upper cased version
                     const upperCaseKey = Key.capitalizedKeys[Key.lowerCaseKeys.indexOf(lowerKey)];
 
-                    // reset key's state
+                    // reset key's state in both its capitalized and lower case versions
                     if (newKeyStates[lowerKey]) {
                         newKeyStates[upperCaseKey] = false;
                         newKeyStates[lowerKey] = false;
@@ -75,6 +69,8 @@ export function Keyboard(props) {
                 return newKeyStates;
             });
         }
+
+        // then always change the key state and add in the current key that is being pressed
         setKeyStates((oldKeysState) => ({
             ...oldKeysState,
             [currentKey]: true
@@ -86,16 +82,16 @@ export function Keyboard(props) {
         const currentKey = e.key;
     
         if (currentKey === "Shift") {
-            setIsCapitalized(false);
-            // Reset keys that were highlighted only due to capitalization
+            setIsKeyboardCapitalized(false);
+            // to prevent keys from sticking if they're held down between capitalized states, we need to manually reset them
             setKeyStates((oldKeysState) => {
                 const newKeyStates = { ...oldKeysState };
-                // for each key, get their lower case version, if the capitalized version is pressed in the old key states then reset it and reset the regular key
+                // for each key, get their lower case & upper case version, if the upper case version is pressed in the old key states then reset it and reset the lower case key
                 Key.capitalizedKeys.forEach(capitalKey => {
                     // get lower cased version
                     const lowerCaseKey = Key.lowerCaseKeys[Key.capitalizedKeys.indexOf(capitalKey)];
 
-                    // reset key's state
+                    // reset key's state in both its capitalized and lower case versions
                     if (newKeyStates[capitalKey]) {
                         newKeyStates[capitalKey] = false;
                         newKeyStates[lowerCaseKey] = false;
@@ -104,6 +100,8 @@ export function Keyboard(props) {
                 return newKeyStates;
             });
         } 
+
+        // then always change the key state and add in the current key that is being released
         setKeyStates((oldKeysState) => ({
             ...oldKeysState,
             [currentKey]: false
@@ -111,6 +109,61 @@ export function Keyboard(props) {
         
     };
 
+    // based on the desired row (1-4) this will return the row. each key will have the correct class names based on our states
+    function displayRow(row) {
+        let currentRowKeys = [];
+
+        // these are just arrays with the desire row's keys, they're based off the lower case versions for consistency
+        if (row === 1) {
+            currentRowKeys = Key.lowerCaseKeys.slice(0, 13).map(key => new Key(key));;
+        } else if (row === 2) {
+            currentRowKeys = Key.lowerCaseKeys.slice(13, 26).map(key => new Key(key));
+        } else if (row === 3) {
+            currentRowKeys = Key.lowerCaseKeys.slice(26, 37).map(key => new Key(key));
+        } else if (row === 4) {
+            currentRowKeys = Key.lowerCaseKeys.slice(37, 50).map(key => new Key(key));
+        }
+
+        // create the row by going through each of the keys, and getting their state(s)
+        return currentRowKeys.map((key, index) => {
+            let className = "";
+
+            // if the upper case or lower case version is within the array of keyState objects, then it's being pressed
+            if (keyStates[key.key] || keyStates[key.displayKey(true)]) {
+                className += "active ";
+            }
+
+            // since row 4 has the shift key, we need to account for that since it's style slightly differently than the other keys
+            if (row === 4) {
+                // mark the shift key with the className 'shift'
+                if (key.key === "Shift") {
+                    className += "shift ";
+
+                    // highlight the shift key if the user needs to press it to get to the desired character
+                    if (isCurrentCharCapital && !isKeyboardCapitalized) {
+                        className += "highlighted ";
+                    }
+                }
+            }
+
+            // we want to highlight the key only if we're in the correct capitalization state (if the shift key is pressed or not) to do so 
+            if (isKeyboardCapitalized && currentChar === key.displayKey(true) || !key.isCapitalChar() && !isKeyboardCapitalized && currentChar === key.key) {
+                className += "highlighted";
+            } 
+
+            // create the key
+            return (
+                <div 
+                key={index}
+                className={`key ${className}`}
+                >
+                    {key.displayKey(isKeyboardCapitalized)}
+                </div>
+            );
+        })
+    }
+
+    // these event listeners are only created once when the app launches
     useEffect(() => {
         window.addEventListener('keydown', handleKeyDown);
         window.addEventListener('keyup', handleKeyUp);
@@ -122,91 +175,20 @@ export function Keyboard(props) {
         };
     }, []); // empty array allows for start at the begining
 
-    // if the isCapitalized is true, then set the key to it's capitalized version
+    // return the full keyboard, along with the spacebar
     return (
         <div className="keyboard">
             <div className="keyboard-row">
-                {firstRowKeys.map((key, index) => {
-                    let className = "";
-                    if (keyStates[key.key]) {
-                        className += "active ";
-                    }
-                    if (isCapitalized && currentChar === key.displayUpperCase() || !key.isCapitalChar() && !isCapitalized && currentChar === key.key) {
-                        className += "highlighted";
-                    } 
-                    return (
-                        <div 
-                        key={index}
-                        className={`key ${className}`}
-                        >
-                            {key.displayKey(isCapitalized)}
-                        </div>
-                    );
-                })}
+                {displayRow(1)}
             </div>
             <div className="keyboard-row">
-                {secondRowKeys.map((key, index) => {
-                    let className = "";
-
-                    if (keyStates[key.displayUpperCase()] || keyStates[key.key]) {
-                        className += "active ";
-                    }
-                    if (isCapitalized && currentChar === key.displayUpperCase() || !key.isCapitalChar() && !isCapitalized && currentChar === key.key) {
-                        className += "highlighted";
-                    } 
-                    return (
-                        <div 
-                        key={index}
-                        className={`key ${className}`}
-                        >
-                            {key.displayKey(isCapitalized)}
-                        </div>
-                    );
-                })}
+                {displayRow(2)}
             </div>
             <div className="keyboard-row">
-                {thirdRowKeys.map((key, index) => {
-                    let className = "";
-                    if (keyStates[key.displayUpperCase()] || keyStates[key.key]) {
-                        className += "active ";
-                    }
-                    if (isCapitalized && currentChar === key.displayUpperCase() || !key.isCapitalChar() && !isCapitalized && currentChar === key.key) {
-                        className += "highlighted";
-                    } 
-                    return (
-                        <div 
-                        key={index}
-                        className={`key ${className}`}
-                        >
-                            {key.displayKey(isCapitalized)}
-                        </div>
-                    );
-                })}
+                {displayRow(3)}
             </div>
             <div className="keyboard-row">
-                {fourthRowKeys.map((key, index) => {
-                    let className = "";
-                    if (keyStates[key.displayUpperCase()] || keyStates[key.key]) {
-                        className += "active ";
-                    }
-                    if (key.key === "Shift") {
-                        className += "shift ";
-                        if (isCurrentCharCapital && !isCapitalized) { // if the currentChar is a captialized character and we haven't already pressed the shift key
-                            className += "highlighted ";
-                        }
-                    }
-                    if (isCapitalized && currentChar === key.displayUpperCase() || !key.isCapitalChar() && !isCapitalized && currentChar === key.key) {
-                        className += "highlighted";
-                    } 
-                    return (
-                        <div 
-                        key={index}
-                        className={`key ${className}`}
-                        >
-                            {key.displayKey(isCapitalized)}
-                        </div>
-                    );
-                })}
+                {displayRow(4)}
             </div>
             <div className="keyboard-row">
                 <div 
