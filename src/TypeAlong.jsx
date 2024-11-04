@@ -81,7 +81,7 @@ export function TypeAlong(props) {
         // if a key is pressed, check if it's the expected key/character 
         if (currentKey === expectedChar) {
             if (charIndex + 1 === currentPromptLength) { // if we've finished the current prompt
-                if (promptIndex + 1 === currentPromptLength) { // reset back to the first prompt if all other prompts were finished
+                if (promptIndex + 1 === prompts.length) { // reset back to the first prompt if all other prompts were finished
                     setPromptIndex(0);
                     setCharIndex(0);
                 } else { // otherwise just move to the next prompt
