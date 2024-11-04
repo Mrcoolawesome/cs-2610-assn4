@@ -6,7 +6,6 @@
 4. As the user types the prompt, move the underscore from character to character
 5. If the user types the correct character, change the color of that character
 6. If the user types an incorrect characer, don't move the underscore
-7. If the user finishes a prompt, create a new one 
-8. When the user begins a new prompt, start them from the beginning
-9. The keyboard shall allow multiple keys to be pressed at once
+7. If the user finishes a prompt, give them a new one
+8. When the user finishes all prompts, start them from the first prompt
 10. The onscreen keybaord shall highlight which key should be pressed
