@@ -1,52 +1,5 @@
 import { useEffect, useState } from 'react';
 
-class Phrase {
-    constructor(prompt) {
-        this.prompt = prompt;
-        this.promptChars = prompt.split('');
-        this.length = this.promptChars.length;
-    }
-
-    // given the current character the user needs to type, determine what has already been typed
-    getCompletedCharsString(currentCharIndex) {
-        const completedChars = this.promptChars.slice(0, currentCharIndex);
-
-        // if we're at the end of the prompt, just return the full prompt
-        if (currentCharIndex === this.length) {
-            return this.prompt;
-        }
-
-        // turn it back into a string
-        const completedString = completedChars.join('');
-        return completedString;
-    }
-
-    // return a character from this phrase based off its index
-    getCurrentChar(currentCharIndex) {
-        const currentChar = this.promptChars[currentCharIndex];
-        return currentChar;
-    }
-
-    // given the current character the user needs to type, determine what still needs to be typed
-    getIncompletedCharsString(currentCharIndex) {
-        let incompletedChars = [];
-
-        // don't want to include the current in-progress character, hence the addition of 1 to the index
-        if (currentCharIndex + 1 < this.length) {
-            incompletedChars = this.promptChars.slice(currentCharIndex + 1, this.length); 
-        } 
-
-        // turn it back into a string
-        const completedString = incompletedChars.join('');
-        return completedString;
-    }
-
-    // return the length of our prompt in terms of number of characters
-    getLength() {
-        return this.length;
-    }
-}
-
 // will create the dynamically changing display of the prompt
 export function TypeAlong(props) {
     // this state will represent the current expected character's index in terms of the prompt
@@ -79,21 +32,56 @@ export function TypeAlong(props) {
     ];
     
     // array of prompt objects for each prompt string
-    const promptObjects = prompts.map((prompt) => new Phrase(prompt)); 
+    const promptObjects = prompts.map((prompt) => prompt); 
     const currentPrompt = promptObjects[promptIndex];
+    const currentPromptChars = currentPrompt.split('');
+    const currentPromptLength = currentPrompt.length;
+
+    // given the current character the user needs to type, determine what has already been typed
+    function getCompletedCharsString(currentCharIndex) {
+        const completedChars = currentPromptChars.slice(0, currentCharIndex);
+
+        // if we're at the end of the prompt, just return the full prompt
+        if (currentCharIndex === currentPromptLength) {
+            return currentPrompt;
+        }
+
+        // turn it back into a string
+        const completedString = completedChars.join('');
+        return completedString;
+    }
+
+    // return a character from this phrase based off its index
+    function getCurrentChar(currentCharIndex) {
+        const currentChar = currentPromptChars[currentCharIndex];
+        return currentChar;
+    }
+
+    // given the current character the user needs to type, determine what still needs to be typed
+    function getIncompletedCharsString(currentCharIndex) {
+        let incompletedChars = [];
+
+        // don't want to include the current in-progress character, hence the addition of 1 to the index
+        if (currentCharIndex + 1 < currentPromptLength) {
+            incompletedChars = currentPromptChars.slice(currentCharIndex + 1, currentPromptLength); 
+        } 
+
+        // turn it back into a string
+        const completedString = incompletedChars.join('');
+        return completedString;
+    }
 
     // whenever a key is pressed, check if it's the expected key and change state accordingly
     const handleKeyDown = (e) => {
         const currentKey = e.key;
 
         // get the current expected character from the current prompt
-        const currentPrompt = promptObjects[promptIndex];
-        const expectedChar = currentPrompt.getCurrentChar(charIndex);
+        const expectedChar = getCurrentChar(charIndex);
 
         // if a key is pressed, check if it's the expected key/character 
         if (currentKey === expectedChar) {
-            if (charIndex + 1 === currentPrompt.getLength()) { // if we've finished the current prompt
-                if (promptIndex + 1 === prompts.length) { // reset back to the first prompt if all other prompts were finished
+            if (charIndex + 1 === currentPromptLength) { // if we've finished the current prompt
+                if (promptIndex + 1 === currentPromptLength) { // reset back to the first prompt if all other prompts were finished
                     setPromptIndex(0);
                     setCharIndex(0);
                 } else { // otherwise just move to the next prompt
@@ -111,7 +99,7 @@ export function TypeAlong(props) {
     useEffect(() => {
         window.addEventListener('keydown', handleKeyDown);
         // also update the current expected character state on every prompt index and charIndex state change
-        setCurrentChar(currentPrompt.getCurrentChar(charIndex));
+        setCurrentChar(getCurrentChar(charIndex));
 
         // remove event listeners
         return () => {
@@ -122,21 +110,21 @@ export function TypeAlong(props) {
     return ( 
         <>
             {currentPrompt && ( // checking if the 'currentPrompt' variable is not null or undefined
-                <div className="phrase" key={currentPrompt.getLength()}>
+                <div className="phrase" key={currentPromptLength}>
                     <span 
                         className="typed-phrase"
                     >
-                        {currentPrompt.getCompletedCharsString(charIndex)}
+                        {getCompletedCharsString(charIndex)}
                     </span>
                     <span 
                         className="pointer"
                     >
-                        {currentPrompt.getCurrentChar(charIndex)}
+                        {getCurrentChar(charIndex)}
                     </span>
                     <span 
                         className="remaining-phrase"
                     >
-                        {currentPrompt.getIncompletedCharsString(charIndex)}
+                        {getIncompletedCharsString(charIndex)}
                     </span>
                 </div>
             )}
