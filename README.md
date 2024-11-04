@@ -8,4 +8,4 @@
 6. If the user types an incorrect characer, don't move the underscore
 7. If the user finishes a prompt, give them a new one
 8. When the user finishes all prompts, start them from the first prompt
-10. The onscreen keybaord shall highlight which key should be pressed
+9. The onscreen keybaord shall highlight which key should be pressed
